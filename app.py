@@ -27,9 +27,9 @@ def download_file_from_google_drive(file_id, destination):
                 f.write(chunk)
 
 MODEL_FILES = {
-    'recipes_df.pkl': '1pBqse6tbSha_kbVvHbs0TOZ6XZM750ri',
-    'tfidf_vectorizer.joblib': '1DsnI2X7IVMv8nTNB9poGa9BBIw2IROCS',
-    'ingredient_vectors.joblib': '1HTk_bij0xwHOIU6joA0nL8nEA0lTZyYW',
+    'processed_recipes.csv': '1_2yKUpftAkQwlpelxh2jryyomSsRhWRb',
+    'tfidf_vectorizer.joblib': '1U7DjrB1xGm4s4O36FuUFHShkVDSQrDUs',
+    'ingredient_vectors.joblib': '12YGQ8qg0pleMCb5lv1fH_X_DOzHHPh_z',
 }
 
 for filename, file_id in MODEL_FILES.items():
@@ -39,7 +39,7 @@ for filename, file_id in MODEL_FILES.items():
 
 class RecipeRecommender:
     def __init__(self):
-        self.df = pd.read_pickle('recipes_df.pkl')
+        self.df = pd.read_csv('processed_recipes.csv')
         self.vectorizer = joblib.load('tfidf_vectorizer.joblib')
         self.ingredient_vectors = joblib.load('ingredient_vectors.joblib')
 

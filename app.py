@@ -28,8 +28,6 @@ def download_file_from_google_drive(file_id, destination):
 
 MODEL_FILES = {
     'processed_recipes.csv': '1_2yKUpftAkQwlpelxh2jryyomSsRhWRb',
-    'tfidf_vectorizer.joblib': '1lCSxkKvmrAqPMuh5n-JYft5usaxEVHR6',
-    'ingredient_vectors.joblib': '18pjbExrvpLJCtTongyRnX_5kH3waF1ZA',
 }
 
 for filename, file_id in MODEL_FILES.items():

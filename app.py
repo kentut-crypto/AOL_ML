@@ -13,14 +13,21 @@ def download_file_from_github(url, destination):
             if chunk:
                 f.write(chunk)
 
-class RecipeRecommender:
-    def __init__(self, model_file='recipe_recommender.joblib'):
-        github_url = "https://github.com/kentut-crypto/AOL_ML/releases/download/v1.0.1/recipe_recommender.joblib"
-        
+@st.cache_resource
+def load_recommender():
+    model_file = 'recipe_recommender.joblib'
+    github_url = "https://github.com/kentut-crypto/AOL_ML/releases/download/v1.0.1/recipe_recommender.joblib"
+
+    if not os.path.exists(model_file):
         with st.spinner("Downloading model from GitHub Release..."):
             download_file_from_github(github_url, model_file)
-        
-        model = joblib.load(model_file)
+
+    model = joblib.load(model_file)
+    recommender = RecipeRecommender(model)
+    return recommender
+
+class RecipeRecommender:
+    def __init__(self, model):
         self.df = model['df']
         self.vectorizer = model['vectorizer']
         self.ingredient_vectors = model['ingredient_vectors']
@@ -67,7 +74,7 @@ def main():
 
     # Initialize recommender
     try:
-        recommender = RecipeRecommender()
+        recommender = load_recommender()
     except FileNotFoundError:
         loading_placeholder.error("Recipe dataset not found. Please check the file path.")
         st.stop()

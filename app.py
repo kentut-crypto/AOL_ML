@@ -4,21 +4,9 @@ from sklearn.metrics.pairwise import cosine_similarity
 import requests
 import os
 
-def download_file_from_google_drive(file_id, destination):
-    URL = "https://docs.google.com/uc?export=download"
-    session = requests.Session()
-
-    response = session.get(URL, params={'id': file_id}, stream=True)
-    token = None
-    for key, value in response.cookies.items():
-        if key.startswith('download_warning'):
-            token = value
-            break
-
-    if token:
-        params = {'id': file_id, 'confirm': token}
-        response = session.get(URL, params=params, stream=True)
-
+def download_file_from_github(url, destination):
+    response = requests.get(url, stream=True)
+    response.raise_for_status()
     CHUNK_SIZE = 32768
     with open(destination, "wb") as f:
         for chunk in response.iter_content(CHUNK_SIZE):
@@ -27,10 +15,10 @@ def download_file_from_google_drive(file_id, destination):
 
 class RecipeRecommender:
     def __init__(self, model_file='recipe_recommender.joblib'):
-        file_id = '1eNhlhiT24MMDZODZRx8N7lgS98BNXsFW'
+        github_url = "https://github.com/kentut-crypto/AOL_ML/releases/tag/v1.0.0/recipe_recommender.joblib"
         
-        with st.spinner(f"Downloading model from Google Drive..."):
-            download_file_from_google_drive(file_id, model_file)
+        with st.spinner("Downloading model from GitHub Release..."):
+            download_file_from_github(github_url, model_file)
         
         model = joblib.load(model_file)
         self.df = model['df']

@@ -15,7 +15,7 @@ def download_file_from_github(url, destination):
 
 class RecipeRecommender:
     def __init__(self, model_file='recipe_recommender.joblib'):
-        github_url = "https://github.com/kentut-crypto/AOL_ML/releases/tag/v1.0.0/recipe_recommender.joblib"
+        github_url = "https://github.com/kentut-crypto/AOL_ML/releases/tag/v1.0.1/recipe_recommender.joblib"
         
         with st.spinner("Downloading model from GitHub Release..."):
             download_file_from_github(github_url, model_file)

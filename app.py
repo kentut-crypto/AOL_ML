@@ -1,9 +1,8 @@
 import streamlit as st
-import pandas as pd
-from sklearn.metrics.pairwise import cosine_similarity
 import joblib
-import os
+from sklearn.metrics.pairwise import cosine_similarity
 import requests
+import os
 
 def download_file_from_google_drive(file_id, destination):
     URL = "https://docs.google.com/uc?export=download"
@@ -26,36 +25,32 @@ def download_file_from_google_drive(file_id, destination):
             if chunk:
                 f.write(chunk)
 
-MODEL_FILES = {
-    'processed_recipes.csv': '1_2yKUpftAkQwlpelxh2jryyomSsRhWRb',
-}
-
-for filename, file_id in MODEL_FILES.items():
-    if not os.path.exists(filename):
-        with st.spinner(f"Downloading {filename} from Google Drive..."):
-            download_file_from_google_drive(file_id, filename)
-
 class RecipeRecommender:
-    def __init__(self):
-        self.df = pd.read_csv('processed_recipes.csv')
-        self.vectorizer = joblib.load('tfidf_vectorizer.joblib')
-        self.ingredient_vectors = joblib.load('ingredient_vectors.joblib')
+    def __init__(self, model_file='recipe_recommender.joblib'):
+        file_id = '1eNhlhiT24MMDZODZRx8N7lgS98BNXsFW'
+        
+        with st.spinner(f"Downloading model from Google Drive..."):
+            download_file_from_google_drive(file_id, model_file)
+        
+        model = joblib.load(model_file)
+        self.df = model['df']
+        self.vectorizer = model['vectorizer']
+        self.ingredient_vectors = model['ingredient_vectors']
 
     def recommend_recipes(self, input_ingredients, top_n=5):
         if not input_ingredients:
             return []
 
-        input_ingredient_str = ' '.join(input_ingredients)
-        input_vector = self.vectorizer.transform([input_ingredient_str])
+        input_str = ' '.join(input_ingredients)
+        input_vector = self.vectorizer.transform([input_str])
         similarities = cosine_similarity(input_vector, self.ingredient_vectors)[0]
-
         top_indices = similarities.argsort()[-top_n:][::-1]
 
         recommendations = []
         for idx in top_indices:
             try:
                 recommendations.append({
-                    'recipe_name': self.df.iloc[idx, 0],  # Recipe name
+                    'recipe_name': self.df.iloc[idx, 0],
                     'ingredients': eval(self.df.iloc[idx, 10]) if isinstance(self.df.iloc[idx, 10], str) else self.df.iloc[idx, 10],
                     'ingredients_list': self.df.iloc[idx, 10],
                     'similarity_score': similarities[idx],
@@ -64,13 +59,11 @@ class RecipeRecommender:
                 })
             except Exception as e:
                 st.warning(f"Could not process recipe: {e}")
-
         return recommendations
 
     def ingredient_overlap(self, input_ingredients, recipe_ingredients):
         input_set = set(input_ingredients)
         recipe_set = set(recipe_ingredients)
-
         overlap = len(input_set.intersection(recipe_set))
         return (overlap / len(input_set)) * 100 if input_set else 0
 
